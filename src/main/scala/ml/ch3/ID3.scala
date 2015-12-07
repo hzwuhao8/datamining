@@ -47,6 +47,46 @@ object ID3 extends App {
     h._1
   }
   
+  def cols(dataSet: List[List[Any]] , index: Int) :List[Any] = {
+    dataSet.map( row => row(index))
+  }
+  def colsSize(dataSet: List[List[Any]] ) : Int =   dataSet.head.size
+  
+  def classListVal(dataSet: List[List[Any]]) = cols(dataSet , colsSize(dataSet)-1)
+  
+  def createTree(dataSet: List[List[Any]], labels: List[Symbol]): Any = {
+    println("\n\n" + "-" * 60)
+    println(s"dataSet=${dataSet}")
+    println(s"labels=${labels}")
+    val classList = classListVal(dataSet)
+    println(s"classList=${classList}")
+    
+    val res = if( classList.forall { x => x== classList.head }){
+       classList.head
+    }else if( dataSet.head.size == 1 ){
+       major( classList)
+    }else{
+      val bestFeat = chooseBsetFeaturetoSplit(dataSet)
+      val bestFeatLabel = labels(bestFeat._1)
+      println(s"bestFeatLabel=${bestFeatLabel}")
+      val subLabel =  labels.filter( _ != bestFeatLabel)
+      val featValues = dataSet.map(row => row( bestFeat._1))
+      val uniqueVals = featValues.distinct
+      println(s"uniqueVals=${uniqueVals}")
+      val x = uniqueVals.map{ value => 
+          val k = value
+          val v = createTree(splitDataSet(dataSet, bestFeat._1, value),subLabel)
+          println(s"kv=${ k -> v }")
+          k->v
+      }
+      val myTree = Map(bestFeatLabel ->  x )
+      myTree
+    }
+    println(res)
+    res 
+    
+  }
+  
   val dataSet = List(
 
     List(1, 1, 'yes),
@@ -63,5 +103,12 @@ object ID3 extends App {
   println(splitDataSet(dataSet, 0, 0))
   
   println(chooseBsetFeaturetoSplit(dataSet))
+  
+  println( major( dataSet.map( row => row.last)))
+  
+  val labels = List('no_surfacing, 'flippers)
+  
+  val r = createTree(dataSet, labels)
+  println(r)
   
 }
