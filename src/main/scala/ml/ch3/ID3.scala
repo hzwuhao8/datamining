@@ -2,7 +2,7 @@ package ml.ch3
 
 object ID3 extends App {
 
-  def calcShannoneEnt(dataSet: List[List[Any]]): Double = {
+  def calcShannoneEnt(dataSet: IndexedSeq[IndexedSeq[Any]]): Double = {
     val log102 = Math.log10(2)
     val total = dataSet.size
     val g = dataSet.groupBy { x => x.last }.map(kv => kv._1 -> kv._2.size)
@@ -12,14 +12,15 @@ object ID3 extends App {
 
   }
 
-  def splitDataSet(dataSet: List[List[Any]], axis: Int, value: Any): List[List[Any]] = {
+  def splitDataSet(dataSet: IndexedSeq[IndexedSeq[Any]], axis: Int, value: Any): IndexedSeq[IndexedSeq[Any]] = {
     dataSet.filter(row => row(axis) == value).map { row =>
+     
       val (p1, p2) = row.splitAt(axis)
-      p1 ::: p2.tail
+      p1 ++ p2.drop(1)
     }
   }
 
-  def chooseBestFeaturetoSplit(dataSet: List[List[Any]]): (Int, Double) = {
+  def chooseBestFeaturetoSplit(dataSet: IndexedSeq[IndexedSeq[Any]]): (Int, Double) = {
     val numberFeatures = dataSet.head.size - 1
     val baseEntropy = calcShannoneEnt(dataSet)
   
@@ -40,20 +41,20 @@ object ID3 extends App {
     
   }
 
-  def major[A]( col: List[A]): A = {
+  def major[A]( col: IndexedSeq[A]): A = {
     val t1 = col.groupBy { x => x }.map( kv => kv._1 -> kv._2.size).toList
     val h =  t1.sortBy( kv => kv._2).reverse.head
     h._1
   }
   
-  def cols(dataSet: List[List[Any]] , index: Int) :List[Any] = {
+  def cols(dataSet: IndexedSeq[IndexedSeq[Any]] , index: Int) :IndexedSeq[Any] = {
     dataSet.map( row => row(index))
   }
-  def colsSize(dataSet: List[List[Any]] ) : Int =   dataSet.head.size
+  def colsSize(dataSet: IndexedSeq[IndexedSeq[Any]] ) : Int =   dataSet.head.size
   
-  def classListVal(dataSet: List[List[Any]]) = cols(dataSet , colsSize(dataSet)-1)
+  def classListVal(dataSet: IndexedSeq[IndexedSeq[Any]]) = cols(dataSet , colsSize(dataSet)-1)
   
-  def createTree(dataSet: List[List[Any]], labels: List[Symbol]): Any = {
+  def createTree(dataSet: IndexedSeq[IndexedSeq[Any]], labels: IndexedSeq[Symbol]): Any = {
     println("\n\n" + "-" * 60)
     println(s"dataSet=${dataSet}")
     println(s"labels=${labels}")
@@ -86,17 +87,17 @@ object ID3 extends App {
     
   }
   
-  val dataSet = List(
+  val dataSet = IndexedSeq(
 
-    List(1, 1, 'yes),
-    List(1, 1, 'yes),
-    List(1, 0, 'no),
-    List(0, 1, 'no),
-    List(0, 1, 'no))
+    IndexedSeq(1, 1, 'yes),
+    IndexedSeq(1, 1, 'yes),
+    IndexedSeq(1, 0, 'no),
+    IndexedSeq(0, 1, 'no),
+    IndexedSeq(0, 1, 'no))
   val s1 = calcShannoneEnt(dataSet)
   println(s"s1=${s1}")
 
-  val s2 = calcShannoneEnt(List(1, 1, 'maybe) :: dataSet.tail)
+  val s2 = calcShannoneEnt( dataSet.drop(1).+:( IndexedSeq(1, 1, 'maybe)) )
   println(s"s2=${s2}")
   println(splitDataSet(dataSet, 0, 1))
   println(splitDataSet(dataSet, 0, 0))
@@ -105,7 +106,7 @@ object ID3 extends App {
   
   println( major( dataSet.map( row => row.last)))
   
-  val labels = List('no_surfacing, 'flippers)
+  val labels = IndexedSeq('no_surfacing, 'flippers)
   
   val r = createTree(dataSet, labels)
   println(r)
