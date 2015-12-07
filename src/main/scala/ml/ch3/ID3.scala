@@ -90,7 +90,7 @@ object ID3 extends App {
   def classify(inputTree2: Any, labels: IndexedSeq[Symbol], testVec: IndexedSeq[Any]): Symbol = {
     inputTree2 match {
       case inputTree: Map[_, _] =>
-        println( inputTree)
+        println(inputTree)
         val firstStr = inputTree.keys.head
         val secondDict = inputTree(firstStr)
         val featIndex = labels.indexOf(firstStr)
@@ -98,19 +98,20 @@ object ID3 extends App {
         println(s"secondDict=${secondDict}")
         println(s"featIndex=${featIndex}")
         secondDict match {
-          case dict: Map[_, _] => val sq = for (key <- dict.keys) yield {
-            val classLabel = if (testVec(featIndex) == key) {
-              dict(key) match {
-                case dd: Map[_, _] => classify(dd, labels, testVec)
-                case x : Symbol => x
+          case dict: Map[_, _] =>
+            val sq = for (key <- dict.keys) yield {
+              val classLabel = if (testVec(featIndex) == key) {
+                dict(key) match {
+                  case dd: Map[_, _] => classify(dd, labels, testVec)
+                  case x: Symbol     => x
+                }
+              } else {
+                'UNKNOWN
               }
-            }else{
-              'UNKNOWN
+              classLabel
             }
-            classLabel
-          }
-          sq.filterNot( _ == 'UNKNOWN).headOption.getOrElse('UNKNOWN)
-          
+            sq.filterNot(_ == 'UNKNOWN).headOption.getOrElse('UNKNOWN)
+
           case x: Symbol => x
         }
     }
@@ -141,13 +142,20 @@ object ID3 extends App {
   val r = createTree(dataSet, labels)
   println(r)
   val c1 = r match {
-    case inputTree: Map[_, _] => 
+    case inputTree: Map[_, _] =>
       val dataSet = IndexedSeq(
-          IndexedSeq(0,0)
-      )
-      dataSet.map{ row => classify(inputTree, labels, row )}
-      
+        IndexedSeq(1, 1),
+        IndexedSeq(0, 1),
+        IndexedSeq(1, 0),
+        IndexedSeq(0, 0),
+        IndexedSeq(2, 0),
+        IndexedSeq(0, 2),
+        IndexedSeq(2, 1),
+        IndexedSeq(1, 2),
+        IndexedSeq(2, 2))
+      dataSet.map { row => row -> classify(inputTree, labels, row) }
+
   }
-  println(s"c1=${c1}")
+  println(s"c1=${c1.mkString("\n")}")
 
 }
