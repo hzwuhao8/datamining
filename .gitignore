@@ -9,3 +9,4 @@ target
 /bin/
 /.cache-main
 /.cache-tests
+.cache
