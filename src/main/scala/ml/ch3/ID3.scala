@@ -41,6 +41,12 @@ object ID3 extends App {
     
   }
 
+  def major[A]( col: List[A]): A = {
+    val t1 = col.groupBy { x => x }.map( kv => kv._1 -> kv._2.size).toList
+    val h =  t1.sortBy( kv => kv._2).reverse.head
+    h._1
+  }
+  
   val dataSet = List(
 
     List(1, 1, 'yes),
