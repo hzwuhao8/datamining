@@ -19,11 +19,10 @@ object ID3 extends App {
     }
   }
 
-  def chooseBsetFeaturetoSplit(dataSet: List[List[Any]]): (Int, Double) = {
+  def chooseBestFeaturetoSplit(dataSet: List[List[Any]]): (Int, Double) = {
     val numberFeatures = dataSet.head.size - 1
     val baseEntropy = calcShannoneEnt(dataSet)
-    var bsetInfoGain = 0.0 ;
-    var bestFeature = - 1
+  
     val d2  =  for( i <-  0 until numberFeatures) yield{
       val uniqueValus = dataSet.map( row => row(i)).distinct
       
@@ -66,7 +65,7 @@ object ID3 extends App {
     }else if( dataSet.head.size == 1 ){
        major( classList)
     }else{
-      val bestFeat = chooseBsetFeaturetoSplit(dataSet)
+      val bestFeat = chooseBestFeaturetoSplit(dataSet)
       val bestFeatLabel = labels(bestFeat._1)
       println(s"bestFeatLabel=${bestFeatLabel}")
       val subLabel =  labels.filter( _ != bestFeatLabel)
@@ -102,7 +101,7 @@ object ID3 extends App {
   println(splitDataSet(dataSet, 0, 1))
   println(splitDataSet(dataSet, 0, 0))
   
-  println(chooseBsetFeaturetoSplit(dataSet))
+  println(chooseBestFeaturetoSplit(dataSet))
   
   println( major( dataSet.map( row => row.last)))
   
