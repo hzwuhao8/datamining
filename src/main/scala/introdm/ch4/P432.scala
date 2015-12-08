@@ -2,7 +2,7 @@ package introdm.ch4
 
 import ml.ch3.ID3
 
-object P432 extends App {
+object P432 {
 
   val dataSet = IndexedSeq(
     IndexedSeq('是, '单身, 125, 'no),
@@ -14,9 +14,12 @@ object P432 extends App {
     IndexedSeq('是, '离异, 220, 'no),
     IndexedSeq('否, '单身, 85, 'yes),
     IndexedSeq('否, '已婚, 75, 'no),
-    IndexedSeq('否, '单身, 90, 'yes)
-    )
-    val labels = IndexedSeq('有房者, '婚姻状况, '年收入)
-   val r = ID3.createTree(dataSet, labels)
-   println(r)
+    IndexedSeq('否, '单身, 90, 'yes))
+  val labels = IndexedSeq('有房者, '婚姻状况, '年收入)
+  def main(args: Array[String]) = {
+
+    val r = ID3.createTree(dataSet, labels)
+    println(r)
+  }
+
 }

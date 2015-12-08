@@ -51,9 +51,12 @@ presbyopic	hyper	yes	normal	no lenses
   println(d3)
   
    
-  val d4 = util.DataConvert.convert(dataSet)(  s => Ordering[String]  )
+  val d4 = util.DataConvert.convert(dataSet)
   
   println(d4)
+  
+  val d5 = util.DataConvert.convert( introdm.ch4.P432.dataSet)
+  println(d5)
   /**
    * *
    * spakr mllib 中的 例子数据是  一个 稀疏矩阵，
