@@ -49,6 +49,11 @@ presbyopic	hyper	yes	normal	no lenses
   d2.foreach(println)
   val d3 = d2.map(r => (r.last, r.init))
   println(d3)
+  
+   
+  val d4 = util.DataConvert.convert(dataSet)(  s => Ordering[String]  )
+  
+  println(d4)
   /**
    * *
    * spakr mllib 中的 例子数据是  一个 稀疏矩阵，
