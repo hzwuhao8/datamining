@@ -17,8 +17,8 @@ object Tree extends App {
   val dd5 = d5.map(row => LabeledPoint(row._1, new DenseVector(row._2.toArray)))
   val trainingData = sc.makeRDD(dd5)
   val numClasses = 2
-  val categoricalFeaturesInfo = Map[Int, Int]()
-  val impurity = "Variance".toLowerCase()
+  val categoricalFeaturesInfo = Map[Int, Int](0 -> 2, 1 ->3)
+  val impurity = "Gini".toLowerCase()
   val maxDepth = 5
   val maxBins = 32
 
@@ -26,7 +26,11 @@ object Tree extends App {
     impurity, maxDepth, maxBins)
 
   println("Learned classification tree model:\n" + model.toDebugString)
-
+  val test = d5.map{row => 
+    val p = model.predict( new DenseVector(row._2.toArray) )
+    (row._1 , p)
+  }
+  test.foreach(println)
   sc.stop()
 
 }
