@@ -44,7 +44,7 @@ object DataConvert {
       
 
     }
-    println(seqMap)
+    //println(seqMap)
     val d2 = dataSet.map { row => row.zipWithIndex.map{r => r._1 match{
       case x: Int => x.toDouble
       case x: Double => x
@@ -54,7 +54,7 @@ object DataConvert {
     } 
       
      } }
-    d2.foreach(println)
+    //d2.foreach(println)
     val d3 = d2.map(r => (r.last.toDouble, r.init.map( _.toDouble)) )
     d3
   }
