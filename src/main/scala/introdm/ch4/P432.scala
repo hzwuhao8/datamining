@@ -22,4 +22,13 @@ object P432 {
     println(r)
   }
 
+  val dataSet2 = dataSet.map( row => Data(Some( row(0).asInstanceOf[Symbol].toString()),
+      row(1).asInstanceOf[Symbol].toString,
+      row(2).asInstanceOf[Int],
+      row(3).asInstanceOf[Symbol].toString) )
+      
+  
+  case class Data(house: Option[String], wenxin: String ,salary: Int, label: String)
+  
 }
+
