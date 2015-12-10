@@ -47,6 +47,7 @@ object App02 extends App {
   val model = pipeline.fit(df)
  
   val predictions = model.transform(df)
+  predictions.show()
   // Select example rows to display.
   predictions.select("predictedLabel", "label", "features").show(5)
 

@@ -39,11 +39,11 @@ object DfApp extends App {
   val assembler = new VectorAssembler( ).setInputCols(Array("house2","wenxin2", "salary"))
   .setOutputCol("features")
   
-  val pipeline = new Pipeline().setStages(Array(cvModel, cvModel2,cvModel3,assembler))
+  val pipeline = new Pipeline().setStages(Array(cvModel, cvModel2,assembler))
   val m = pipeline.fit(data).transform(data)
   m.show()
   m.registerTempTable("btable")
-  val lastd = sqlSc.sql("select label2,features from btable")
+  val lastd = sqlSc.sql("select label,features from btable")
  
   lastd.write.parquet("/tmp/aa.txt")
  
