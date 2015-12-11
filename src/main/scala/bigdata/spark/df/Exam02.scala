@@ -41,13 +41,16 @@ object Exam02 extends App {
   val hash1 = new HashingTF().setInputCol("seq1").setOutputCol("raw1").setNumFeatures(20)
   val idf1 = new IDF().setInputCol("raw1").setOutputCol("result1")
   
+  val hash2 = new HashingTF().setInputCol("seq2").setOutputCol("raw2").setNumFeatures(20)
+  val idf2 = new IDF().setInputCol("raw2").setOutputCol("result2")
+  
   val assembler = new VectorAssembler().setInputCols(Array( "c1", "c2", "d",
     "tel1", "tel2", "password1", "password2", "menu1", "menu2",
     "t1", "t2", "utotal1", "utotal2", "result1", "result2")).setOutputCol("features")
 
   val labeler = new StringIndexer().setInputCol("res").setOutputCol("label")
 
-  val pipeline = new Pipeline().setStages(Array(word2Vec1,word2Vec2, labeler, assembler))
+  val pipeline = new Pipeline().setStages(Array(hash1,idf1,hash2,idf2, labeler, assembler))
 
   val df = pipeline.fit(p1).transform(p1)
 
