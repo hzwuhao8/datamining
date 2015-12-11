@@ -7,6 +7,8 @@ import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature.VectorIndexer
 import org.apache.spark.ml.classification.RandomForestClassifier
 import org.apache.spark.ml.feature.IndexToString
+import org.apache.spark.ml.classification.DecisionTreeClassificationModel
+import org.apache.spark.ml.classification.RandomForestClassificationModel
 
 object App03 extends spark.Base {
   import sqlSc.implicits._
@@ -78,8 +80,11 @@ presbyopic	hyper	yes	normal	no lenses
   val pipeline2 = new Pipeline().setStages(Array(labelIndexer, featureIndexed, rf, labelConverter))
 
   val model = pipeline2.fit(df2)
- 
+  val str = model.stages(2).asInstanceOf[RandomForestClassificationModel].toDebugString
+
+   
+  println(str)
   val predictions = model.transform(df2)
   predictions.show()
-  
+   
 }

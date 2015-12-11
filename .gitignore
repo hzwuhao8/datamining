@@ -10,3 +10,4 @@ target
 /.cache-main
 /.cache-tests
 .cache
+/data
