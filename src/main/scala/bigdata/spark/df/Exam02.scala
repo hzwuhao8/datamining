@@ -38,10 +38,10 @@ object Exam02 extends App {
   .setVectorSize(10)
   .setMinCount(0)
    
-  val hash1 = new HashingTF().setInputCol("seq1").setOutputCol("raw1").setNumFeatures(20)
+  val hash1 = new HashingTF().setInputCol("seq1").setOutputCol("raw1").setNumFeatures(4)
   val idf1 = new IDF().setInputCol("raw1").setOutputCol("result1")
   
-  val hash2 = new HashingTF().setInputCol("seq2").setOutputCol("raw2").setNumFeatures(20)
+  val hash2 = new HashingTF().setInputCol("seq2").setOutputCol("raw2").setNumFeatures(4)
   val idf2 = new IDF().setInputCol("raw2").setOutputCol("result2")
   
   val assembler = new VectorAssembler().setInputCols(Array( "c1", "c2", "d",

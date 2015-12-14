@@ -120,49 +120,7 @@ object Reader extends App {
   
   p1.write.parquet("/tmp/p1txt")
   
-  val df = p1.filter("res != \"\" ")
-  
-  
-  val assembler = new VectorAssembler().setInputCols(Array("c", "c1", "c2", "d",
-    "tel1", "tel2", "password1", "password2", "menu1", "menu2",
-    "t1", "t2", "utotal1", "utotal2")).setOutputCol("features")
-
-  val labeler = new StringIndexer().setInputCol("res").setOutputCol("label")
-
-  val pipeline = new Pipeline().setStages(Array(labeler, assembler))
-
-  val df2 = pipeline.fit(df).transform(df)
-
-  
-  //df2.show();
-
-  val featureIndexed = new VectorIndexer().
-    setInputCol("features").setOutputCol("indexedFeatures").
-    setMaxCategories(4).fit(df2)
-
-  val labelIndexer = new StringIndexer().setInputCol("label").
-    setOutputCol("indexedLabel").fit(df2)
-
-  val rf = new RandomForestClassifier().setLabelCol("indexedLabel").
-    setFeaturesCol("indexedFeatures").setNumTrees(3)
-
-  val labelConverter = new IndexToString().setInputCol("prediction").
-    setOutputCol("predictedLabel").setLabels(labelIndexer.labels)
-
-  val pipeline2 = new Pipeline().setStages(Array(labelIndexer, featureIndexed, rf, labelConverter))
-
-  val model = pipeline2.fit(df2)
-  val str = model.stages(2).asInstanceOf[RandomForestClassificationModel].toDebugString
-
-  println(str)
-  val predictions = model.transform(df2)
-  predictions.select("_id","res","label","prediction","predictedLabel","uname").show()
-
-  val dft1 = p1.filter("res = \"\" ")
-  val df3 = pipeline.fit(dft1).transform(dft1)
-  val predictions2 = model.transform(df3)
-  predictions2.select("_id","res","label","prediction","predictedLabel","uname").show()
-  /**
+   /**
    *  由于 id1-id2  的 组合，不一定是  name1<br>name2  ; 这里存在问题，
    *  组合成主键的时候 id1,id2 进行了排序， 但是 name1 和 name2 没有相应的排序， 所以
    *  存在问题
