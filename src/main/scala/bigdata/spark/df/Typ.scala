@@ -72,16 +72,16 @@ val word2Vec = new Word2Vec()
   val labelIndexer = new StringIndexer().setInputCol("t").
     setOutputCol("indexedLabel").fit(df)
 
-  val rf = new RandomForestClassifier().setLabelCol("indexedLabel").
-    setFeaturesCol("indexedFeatures").setNumTrees(3)
-
+  //val rf = new RandomForestClassifier().setLabelCol("indexedLabel").
+  //  setFeaturesCol("indexedFeatures").setNumTrees(3)
+  val rf2 = new RandomForestClassifier().setLabelCol("indexedLabel").setFeaturesCol("features").setNumTrees(3)
   val labelConverter = new IndexToString().setInputCol("prediction").
     setOutputCol("predictedLabel").setLabels(labelIndexer.labels)
 
-  val pipeline2 = new Pipeline().setStages(Array(labelIndexer, featureIndexed, rf, labelConverter))
-
+  //val pipeline2 = new Pipeline().setStages(Array(labelIndexer, featureIndexed, rf, labelConverter))
+  val pipeline2 = new Pipeline().setStages(Array(labelIndexer,  rf2, labelConverter))
   val model = pipeline2.fit(trainingData)
-  val str = model.stages(2).asInstanceOf[RandomForestClassificationModel].toDebugString
+  val str = model.stages(1).asInstanceOf[RandomForestClassificationModel].toDebugString
   
    
   
