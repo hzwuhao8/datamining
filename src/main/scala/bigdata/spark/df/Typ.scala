@@ -17,13 +17,17 @@ import org.apache.spark.ml.feature.HashingTF
 import org.apache.spark.ml.feature.IDF
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 
+import org.apache.spark.ml.feature.Word2Vec
+
 /**
  *
  */
 object Typ extends App {
+  val master="spark://mac06.local:7077"
 
-  val appName = "Dface"
-  val conf = new SparkConf().setAppName(appName).setMaster("local[3]")
+  val appName = "Dface-type"
+  val conf = new SparkConf().setAppName(appName).setMaster(master)
+  //.setMaster("local[4]")
   val sc = new SparkContext(conf)
   val sqlContext = SQLContext.getOrCreate(sc)
   import sqlContext.implicits._
@@ -41,9 +45,19 @@ val emptywhen = new Column( CaseWhen(Nil))
 
   val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
 
+val word2Vec = new Word2Vec()
+  .setInputCol("words")
+  .setOutputCol("features")
+  .setVectorSize(10)
+  .setMinCount(0)
+
+
+
   val labeler = new StringIndexer().setInputCol("t").setOutputCol("label")
 
-  val pipeline = new Pipeline().setStages(Array(tokenizer, hashingTF, idf))
+  //val pipeline = new Pipeline().setStages(Array(tokenizer, hashingTF, idf))
+
+  val pipeline = new Pipeline().setStages(Array(tokenizer,word2Vec )) 
 
   val df = pipeline.fit(data).transform(data)
 
