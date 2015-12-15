@@ -48,12 +48,12 @@ val emptywhen = new Column( CaseWhen(Nil))
 val word2Vec = new Word2Vec()
   .setInputCol("words")
   .setOutputCol("features")
-  .setVectorSize(100)
+  .setVectorSize(10)
   .setMinCount(0)
 
 
 
- // val labeler = new StringIndexer().setInputCol("t").setOutputCol("label")
+  val labeler = new StringIndexer().setInputCol("t").setOutputCol("label")
 
   //val pipeline = new Pipeline().setStages(Array(tokenizer, hashingTF, idf))
 
@@ -61,21 +61,20 @@ val word2Vec = new Word2Vec()
 
   val df = pipeline.fit(data).transform(data)
 
-  
   val df2 = df.filter("t  >= 0 ")
 
   val Array(trainingData, testData) = df2.randomSplit(Array(0.75, 0.25))
 
-//  val featureIndexed = new VectorIndexer().
-//    setInputCol("features").setOutputCol("indexedFeatures").
-//    setMaxCategories(68).fit(df)
+  val featureIndexed = new VectorIndexer().
+    setInputCol("features").setOutputCol("indexedFeatures").
+    setMaxCategories(68).fit(df)
 
   val labelIndexer = new StringIndexer().setInputCol("t").
     setOutputCol("indexedLabel").fit(df)
 
   //val rf = new RandomForestClassifier().setLabelCol("indexedLabel").
   //  setFeaturesCol("indexedFeatures").setNumTrees(3)
-  val rf2 = new RandomForestClassifier().setLabelCol("indexedLabel").setFeaturesCol("features").setNumTrees(7)
+  val rf2 = new RandomForestClassifier().setLabelCol("indexedLabel").setFeaturesCol("features").setNumTrees(3)
   val labelConverter = new IndexToString().setInputCol("prediction").
     setOutputCol("predictedLabel").setLabels(labelIndexer.labels)
 
