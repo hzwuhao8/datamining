@@ -17,14 +17,14 @@ import org.apache.spark.sql.catalyst.expressions.CaseWhen
  * 对这个 js 文件 用 mongo 导入 运行
  * mongo shop  > /tmp/
  */
-object Similar {
+object Similar  extends App {
   
   val appName = "Dface"
   val conf = new SparkConf().setAppName(appName).setMaster("local")
   val sc = new SparkContext(conf)
   val sqlContext = SQLContext.getOrCreate(sc)
   import sqlContext.implicits._
-  val similar3a = sqlContext.read.json("/tmp/dfacedata/similar3a.0571.json")
+  val similar3a = sqlContext.read.json("/tmp/dfacedata/similar3a.0573.json")
 
   val emptywhen = new Column( CaseWhen(Nil))
   val data = similar3a.filter("res = '1YES' or res='2YES' ").select(
@@ -38,6 +38,6 @@ object Similar {
     val id2 = row.getAs[Long]("id2")
     s"""db.shops.update({_id: $id},{$$set: {del:1 , reason:"${res},${id1},${id2}"}})"""
   }
-  cmdData.saveAsTextFile("/tmp/a4.txt")
+  cmdData.saveAsTextFile("/tmp/0573.txt")
   
 }
