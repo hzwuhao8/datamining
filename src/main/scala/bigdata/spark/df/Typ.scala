@@ -16,8 +16,8 @@ import org.apache.spark.ml.feature.RegexTokenizer
 import org.apache.spark.ml.feature.HashingTF
 import org.apache.spark.ml.feature.IDF
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
-
 import org.apache.spark.ml.feature.Word2Vec
+import org.apache.spark.ml.feature.OneHotEncoder
 
 /**
  *
@@ -51,6 +51,7 @@ val word2Vec = new Word2Vec()
   .setVectorSize(100)
   .setMinCount(0)
 
+val type2Features = new StringIndexer().setInputCol("type").setOutputCol("features")
 
 
  // val labeler = new StringIndexer().setInputCol("t").setOutputCol("label")
@@ -66,16 +67,20 @@ val word2Vec = new Word2Vec()
 
   val Array(trainingData, testData) = df2.randomSplit(Array(0.75, 0.25))
 
-//  val featureIndexed = new VectorIndexer().
-//    setInputCol("features").setOutputCol("indexedFeatures").
-//    setMaxCategories(68).fit(df)
-
+  val featureIndexed = new VectorIndexer().
+    setInputCol("features").setOutputCol("indexedFeatures").
+    setMaxCategories(1000) 
+val oneHotencoder = new OneHotEncoder().setInputCol("features").
+  setOutputCol("indexedFeatures")
+  
   val labelIndexer = new StringIndexer().setInputCol("t").
     setOutputCol("indexedLabel").fit(df)
 
   //val rf = new RandomForestClassifier().setLabelCol("indexedLabel").
   //  setFeaturesCol("indexedFeatures").setNumTrees(3)
-  val rf2 = new RandomForestClassifier().setLabelCol("indexedLabel").setFeaturesCol("features").setNumTrees(7)
+  val rf2 = new RandomForestClassifier().setLabelCol("indexedLabel").setFeaturesCol("features").setNumTrees(3)
+  val rf3 = new RandomForestClassifier().setLabelCol("indexedLabel").setFeaturesCol("indexedFeatures").setNumTrees(3)
+  
   val labelConverter = new IndexToString().setInputCol("prediction").
     setOutputCol("predictedLabel").setLabels(labelIndexer.labels)
 
