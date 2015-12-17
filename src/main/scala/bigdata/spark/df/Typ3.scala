@@ -54,15 +54,28 @@ object Typ3 extends App {
   val readydata = d1.join(s,"type").filter("t1 is not null").sort("_id")
   // 根据 t1  生成  update  语句
   
-  val cmdData = readydata.map{row => 
+ 
+  
+  /**
+   * 这3个分类的数据 是不准的
+   */
+  val xt1="生活服务;生活服务场所;生活服务场所"
+  val xt2= "生活服务;洗浴推拿场所;洗浴推拿场所"
+  val xt3 = "生活服务;洗衣店;洗衣店"
+  
+  val readydata2 = readydata.filter( !( ($"type").isin(xt1,xt2,xt3))    )
+  
+   val cmdData2 = readydata2.map{row => 
     val id = row.getAs[Long]("_id") 
     val res = "type2t"
     val typ = row.getAs[String]("type")
     val t = row.getAs[Double]("t1")
     s"""db.shops.update({_id: $id, t:{$$exists:false}},{$$set: {t: ${t.toLong}  , reason:"${res}"}});//${typ}"""
   }
-  cmdData.take(10).foreach(println)
-  cmdData.saveAsTextFile("/tmp/type2t.txt")
+  cmdData2.take(10).foreach(println)
   
+  cmdData2.saveAsTextFile("/tmp/type2t.txt")
+  // 分类数据的分布这个是准备 应用的
+  val sortedData = readydata2.groupBy("type","t1").count().sort( ("count")) 
   
 }
