@@ -29,7 +29,7 @@ object Exam01 extends util.Log {
     }
   }
 
-  def computeNearestNeighbor(username: String, users: UserMap, distance: (Map[String, Double], Map[String, Double]) => Double = manhattan): Seq[(Double, String)] = {
+  def computeNearestNeighbor(username: String, users: UserMap, distance: (Map[String, Double], Map[String, Double]) => Double): Seq[(Double, String)] = {
 
     val u0 = users(username)
     val uSeq: Seq[(Double, String)] = users.filter { case (k, v) => k != username }.map { case (k, v) => (distance(u0, v), k) }.toList
@@ -39,8 +39,8 @@ object Exam01 extends util.Log {
     rSeq
   }
 
-  def recommed(username: String, users: UserMap): Seq[(String, Double)] = {
-    val nearest = computeNearestNeighbor(username, users).head._2
+  def recommed(username: String, users: UserMap, distance: (Map[String, Double], Map[String, Double]) => Double): Seq[(String, Double)] = {
+    val nearest = computeNearestNeighbor(username, users, distance).head._2
     val neighborRatings = users(nearest)
     val userRatings = users(username)
     val maybe = neighborRatings.--(userRatings.keys)
@@ -49,7 +49,8 @@ object Exam01 extends util.Log {
     log.debug(s"推荐 = username=${username} -> ${res}")
     res
   }
-
+  val recommedManhattan = recommed(_: String, _: UserMap, manhattan)
+  val recommedPearson = recommed(_: String, _: UserMap, pearson)
   def pearson(r1: Map[String, Double], r2: Map[String, Double]): Double = {
     val keys = r1.keySet.intersect(r2.keySet).toSeq
     if (keys.isEmpty) {
@@ -80,17 +81,18 @@ object Exam01 extends util.Log {
     log.info("距离 = {}", manhattan(users(u1), users(u2)))
 
     log.info("距离 = {}", manhattan(users(uh), users(uj)))
-    computeNearestNeighbor(uh, users)
-    recommed(uh, users)
+    computeNearestNeighbor(uh, users, manhattan)
+    recommedManhattan(uh, users)
 
-    recommed("Chan", users)
+    recommedManhattan("Chan", users)
 
-    recommed("Sam", users)
-    recommed("Angelica", users)
+    recommedManhattan("Sam", users)
+    recommedManhattan("Angelica", users)
 
     log.info(s"pearson ${ua},${ub} = {} ", pearson(users(ua), users(ub)))
     log.info(s"pearson ${ua},${uh} = {} ", pearson(users(ua), users(uh)))
     log.info(s"pearson ${ua},${uj} = {} ", pearson(users(ua), users(uj)))
-
+    recommedManhattan(uh, users)
+    recommedPearson(uh, users)
   }
 }
