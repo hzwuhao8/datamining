@@ -8,9 +8,15 @@ scalaVersion := "2.10.6"
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
+resolvers += "NLP" at "http://maven.nlpcn.org"
+
 libraryDependencies ++= Seq(
 	"org.apache.spark" % "spark-core_2.10" % "1.5.2",
-	"org.apache.spark" % "spark-mllib_2.10" % "1.5.2" 
+	"org.apache.spark" % "spark-mllib_2.10" % "1.5.2" ,
+	"org.ansj" % "ansj_seg" % "3.0" , 
+	"com.github.fommil.netlib" % "all" % "1.1.2" pomOnly() 
+	 
+	
 )
 
 
