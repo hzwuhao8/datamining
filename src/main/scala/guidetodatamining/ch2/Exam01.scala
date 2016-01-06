@@ -34,5 +34,7 @@ object Exam01 extends util.Log {
     log.info(s"pearson ${ua},${uj} = {} ", pearson(users(ua), users(uj)))
     recommedManhattan(uh, users)
     recommedPearson(uh, users)
+    recommed(uh,users, pearsonMetric,2)
+    recommed(uj,users, pearsonMetric,1)
   }
 }
