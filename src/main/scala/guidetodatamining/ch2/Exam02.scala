@@ -7,7 +7,7 @@ object Exam02 {
   val users = path + "BX-Users.csv"
   
   
-  def loadBookDBRating(): Rcommender.UserMap = {
+  def loadBookDBRating(): Recommender.UserMap = {
     val lines =  scala.io.Source.fromFile( rating).getLines() 
     val seq = lines.map{ line =>
       val fields = line.split(";")
@@ -59,6 +59,7 @@ object Exam02 {
   }
   
   def main(args: Array[String]): Unit = {
+    val s = System.currentTimeMillis()
     val n = 10
     val data = loadBookDBRating()
     data.take(n).foreach(println)
@@ -67,9 +68,10 @@ object Exam02 {
     val users = loadBookDBUser()
     books.take(n).foreach(println)
     users.take(n).foreach(println)
+    val e1 = System.currentTimeMillis()
+     println(s" load data time  ${( e1 - s )}")
     
-    
-    val r = new Rcommender( data)
+    val r = new Recommender( data)
    
     def userRatings(id: String , n: Int=5)={
       val seq = data.getOrElse(id, Map[String ,Double]()).toSeq.sortBy(_._2).reverse
@@ -84,5 +86,7 @@ object Exam02 {
     val res =  r.recommend(userid)
     res.foreach(println)
     res.map{ case(k,v) => books.getOrElse(k, k) -> v }.foreach(println)
+    val e = System.currentTimeMillis()
+     println(s" run  time  ${( e - e1)}")
   }
 }

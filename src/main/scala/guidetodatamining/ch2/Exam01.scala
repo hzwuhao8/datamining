@@ -1,7 +1,7 @@
 package guidetodatamining.ch2
 
 object Exam01 extends util.Log {
-  import Rcommender._
+  import Recommender._
 
   val users: UserMap = Map("Angelica" -> Map("Blues Traveler" -> 3.5, "Broken Bells" -> 2.0, "Norah Jones" -> 4.5, "Phoenix" -> 5.0, "Slightly Stoopid" -> 1.5, "The Strokes" -> 2.5, "Vampire Weekend" -> 2.0),
     "Bill" -> Map("Blues Traveler" -> 2.0, "Broken Bells" -> 3.5, "Deadmau5" -> 4.0, "Phoenix" -> 2.0, "Slightly Stoopid" -> 3.5, "Vampire Weekend" -> 3.0),
