@@ -94,6 +94,6 @@ object Rcommender extends util.Log {
 }
 //推荐
 //根据 最近 k 个邻居的 内容，推荐 n 个内容
-class Rcommender(data: Rcommender.UserMap, k: Int = 1, metric: Rcommender.MetricFunc, n: Int = 5) {
+class Rcommender(data: Rcommender.UserMap, k: Int = 1, metric: Rcommender.MetricFunc= Rcommender.pearsonMetric, n: Int = 5) {
   def recommend(username: String): Seq[(String, Double)] = Rcommender.recommed(username, data, metric, k, n)
 }
