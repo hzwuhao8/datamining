@@ -46,11 +46,21 @@ class SlopeOne(data: UserMap) extends util.Log {
 
   }
 
+  def zipself[A](x: List[A]):List[(A,A)] ={
+    x match{
+      case Nil => Nil
+      case x::Nil => Nil
+      case h::tail => tail.map( x=> (h,x)) ::: zipself(tail)
+    }
+    
+  }
   def sDev(): Map[(String, String), (Double, Int)] = {
     val e1 = System.currentTimeMillis()
     log.debug(s"开始计算 dev s=${e1}")
-    val movies = data.flatMap { case (u, v) => v.map(_._1) }.toSet.toSeq
-    val pairList = movies.flatMap(x => movies.map(y => (x, y)))
+    val movies = data.flatMap { case (u, v) => v.map(_._1) }.toSet.toList
+   
+    val pairList = zipself(movies)
+    log.debug(s"pairList.size=${pairList.size}")
     val e3 = System.currentTimeMillis()
     log.debug(s"计算 pairList  结束 e=${ e3 - e1 } ")
     
@@ -64,7 +74,17 @@ class SlopeOne(data: UserMap) extends util.Log {
     val xs = new Array[(( String,String),(Double , Int) )](pairList.size )
     s.copyToArray(xs)
     log.debug(s"xs.size=${xs.size}")
-    xs.toSeq.toMap
+    //对自身的差异
+    val s1 = movies.map{ k => (k,k) ->(0.0, 0)}
+    //对称
+    val m1 =  xs.toMap
+    val s2 = pairList.map{ case(x,y) =>
+      val tmp = m1( (x,y))
+      (y,x) ->  (-tmp._1 , tmp._2)
+     }
+    
+   s1.toMap ++ s2.toMap ++ m1
+    
   }
   def pui(u: Map[String, Double], j: String): Double = {
     
@@ -80,7 +100,7 @@ class SlopeOne(data: UserMap) extends util.Log {
       (devji + ui) * cji
 
     }.sum
-    log.debug(s"d1=${d1}, d2=${d2}")
+    //log.debug(s"d1=${d1}, d2=${d2}")
     d1 / d2
 
   }
