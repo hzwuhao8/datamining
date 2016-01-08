@@ -52,32 +52,36 @@ object Exam01 extends util.Log {
    * u 对 i 的 可能的评价
    */
   def pui(u: Map[String, Double], i: String, s: Seq[(String, String, Double)]): Double = {
-    val seq1 = u.map(_._2)
-    val (min, max) = (seq1.min, seq1.max)
-    // 数据归一
-    val run = u.map { case (k, v) => k -> nr(v, min, max) }
-    val sin = s.flatMap {
-      case Tuple3(k1, k2, d) =>
-        if (k1 != i || k2 == i) {
-          None
-        } else {
-          Some(k2 -> d)
-        }
-    }.toMap
+    u.get(i) match {
+      case Some(v) => v
+      case None =>
 
-    val d1 = run.map { case (k, v) => sin.getOrElse(k, 1.0) * v }.sum
-    val d2 = sin.map(kv => Math.abs(kv._2)).sum
+        val seq1 = u.map(_._2)
+        val (min, max) = (seq1.min, seq1.max)
+        // 数据归一
+        val run = u.map { case (k, v) => k -> nr(v, min, max) }
+        val sin = s.flatMap {
+          case Tuple3(k1, k2, d) =>
+            if (k1 != i || k2 == i) {
+              None
+            } else {
+              Some(k2 -> d)
+            }
+        }.toMap
 
-    val d = d1 / d2
-    rn(d, min, max)
+        val d1 = run.map { case (k, v) => sin.getOrElse(k, 1.0) * v }.sum
+        val d2 = sin.map(kv => Math.abs(kv._2)).sum
 
+        val d = d1 / d2
+        rn(d, min, max)
+    }
   }
   def main(args: Array[String]) {
     val bandSeq = users3.flatMap { case (k, v) => v.keySet }.toSet.toSeq
     log.debug(s"bandSeq=${bandSeq}")
     val pairList = bandSeq.flatMap { x =>
       bandSeq.flatMap { y =>
-        if (x == y) Some(( x,y)) else Some((x, y))
+        if (x == y) Some((x, y)) else Some((x, y))
       }
     }.toList
     // 相似度矩阵
@@ -85,10 +89,10 @@ object Exam01 extends util.Log {
     seq.foreach(println)
     val user = "David"
     val movie = "Kacey Musgraves"
-    val  res = pui(users3(user), movie , seq )
+    val res = pui(users3(user), movie, seq)
     log.info(s"${user} -> ${movie} = ${res}")
-    for( (movie,v) <- users3(user)){
-      log.info(s"已知是 ${v}； ${user} -> ${movie} = ${  pui(users3(user), movie , seq )}")
+    for ((movie, v) <- users3(user)) {
+      log.info(s"已知是 ${v}； ${user} -> ${movie} = ${pui(users3(user), movie, seq)}")
     }
   }
 
