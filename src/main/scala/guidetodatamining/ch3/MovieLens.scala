@@ -16,9 +16,12 @@ object MovieLens extends util.Log {
     val data = loadR()
     val item = loadM()
     val r = new SlopeOne(data)
-
-    r.recommondPar("1").map { case (mid, v) => (mid, item.getOrElse(mid, mid), v) }.foreach(println)
-
+    List("1","25").map{ uid => 
+      println(s"uid=${uid}")
+      r.recommondPar(uid ).map { case (mid, v) => (mid, item.getOrElse(mid, mid), v) }.foreach(println)
+      println()
+      
+    }
   }
 
   def loadR(): UserMap = {
