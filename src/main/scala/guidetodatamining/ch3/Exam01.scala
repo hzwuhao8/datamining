@@ -16,7 +16,7 @@ object Exam01 extends util.Log {
       "Daft Punk" -> 5, "Fall Out Boy" -> 3))
 
   def main(args: Array[String]) {
-    val r =new CosRecommend(users3)
+    val r = new CosRecommend(users3)
     r.sdev.foreach(println)
 
     val user = "David"
@@ -36,38 +36,49 @@ object Exam01 extends util.Log {
 
 class CosRecommend(data: UserMap) extends util.Log {
   lazy val sdev = devs()
-  
-  def zipself[A](x: List[A]):List[(A,A)] ={
-    x match{
-      case Nil => Nil
-      case x::Nil => Nil
-      case h::tail => tail.map( x=> (h,x)) ::: zipself(tail)
-    }
-    
+  lazy val averages = data.par.map {
+    case (k, v) =>
+      k -> v.values.sum / v.size
   }
-  
-  
-  def devs(): Map[(String, String), Double] = {
+
+  def zipself[A](x: List[A]): List[(A, A)] = {
+    x match {
+      case Nil       => Nil
+      case x :: Nil  => Nil
+      case h :: tail => tail.map(x => (h, x)) ::: zipself(tail)
+    }
+
+  }
+
+  def devs(): Map[String, Map[String, Double]] = {
     val bandSeq = data.flatMap { case (k, v) => v.keySet }.toSet.toList
     log.debug(s"bandSeq=${bandSeq.take(10)}")
     val pairList = zipself(bandSeq)
-    
-    
+    log.debug(s"pairList.size=${pairList.size}")
+
     // 相似度矩阵
-    val seq = pairList.par.map { case (b1, b2) => (b1, b2) -> computeSimilarity(b1, b2) }
-    val xs = new Array[((String,String), Double)](pairList.size )
-    seq.copyToArray(xs)
-    val m1 = xs.toMap
-    val s1 = pairList.map{ case(b1,b2) =>  (b2,b1) -> m1(b1,b2)}
-    val s2 = bandSeq.map{  b=> (b,b)->1.0}
-    m1 ++ s1 ++ s2
-  }
-  def computeSimilarity(band1: String, band2: String): Double = {
-    val averages = data.par.map {
-      case (k, v) =>
-        k -> v.values.sum / v.size
+    val seq = pairList.flatMap {
+      case (b1, b2) =>
+        val c = computeSimilarity(b1, b2)
+        //println(b1,b2,c)
+        Seq(b1 -> (b2, c),
+          b2 -> (b1, c))
     }
-    
+    val xs = new Array[(String, (String, Double))](pairList.size * 2)
+    seq.copyToArray(xs)
+
+    log.debug(s"devs ok xs.size=${xs.size},${xs.take(10).toList}")
+
+    bandSeq.map { k =>
+      val seq: Array[(String, Double)] = xs.filter { case (k1, v1) => k == k1 }.map { _._2 }
+      k -> (seq ++ Array(k -> 1.0)).toMap
+
+    }.toMap
+
+  }
+
+  def computeSimilarity(band1: String, band2: String): Double = {
+
     val z = (0.0, 0.0, 0.0)
     val (num, dem1, dem2) = data.flatMap {
       case (user, ratings) =>
@@ -108,9 +119,9 @@ class CosRecommend(data: UserMap) extends util.Log {
         val (min, max) = (seq1.min, seq1.max)
         // 数据归一
         val run = u.map { case (k, v) => k -> nr(v, min, max) }
-        val sin = sdev.flatMap {
-          case Tuple2((k1, k2), d) =>
-            if (k1 != i || k2 == i) {
+        val sin = sdev(i).flatMap {
+          case (k2, d) =>
+            if (k2 == i) {
               None
             } else {
               Some(k2 -> d)
@@ -122,6 +133,23 @@ class CosRecommend(data: UserMap) extends util.Log {
 
         val d = d1 / d2
         rn(d, min, max)
+    }
+  }
+
+  //并行版本
+  def recommondPar(u: String, n: Int = 20): Seq[(String, Double)] = {
+    data.get(u) match {
+      case None => Seq()
+      case Some(udata) =>
+        //取得 全部的 movies
+        //计算 还有 评价的 movie
+        // 按评价从高到低排列
+        val movies = devs.map(_._1).toSet
+        val mayBe = (movies -- udata.keys)
+        log.debug(s"mayBe.size=${mayBe.size}")
+        val res = new Array[(String, Double)](mayBe.size)
+        mayBe.par.map(m => (m, pui(udata, m))).copyToArray(res)
+        res.sortBy(_._2).reverse.take(n)
     }
   }
 
