@@ -9,7 +9,7 @@ trait MovieData {
   val moviefile = path + "u.item"
   
   
-  def loadR(): UserMap = {
+  def loadR( ratingfile: String = ratingfile): UserMap = {
     val lines = scala.io.Source.fromFile(ratingfile).getLines()
     val seq = lines.map { line =>
       val fields = line.split("\t")
