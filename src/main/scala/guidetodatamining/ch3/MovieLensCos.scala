@@ -9,7 +9,7 @@ object MovieLensCos extends util.Log with MovieData{
     val r = new CosRecommend(data)
     val sdev = r.sdev
     log.debug(s"sdev= ${sdev.take(1)}")
-    List("1","25").map{ uid => 
+    List("1").map{ uid => 
       println(s"uid=${uid}")
       r.recommondPar(uid ).map { case (mid, v) => (mid, item.getOrElse(mid, mid), v) }.foreach(println)
       println()

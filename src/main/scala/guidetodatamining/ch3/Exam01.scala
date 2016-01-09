@@ -26,6 +26,7 @@ object Exam01 extends util.Log {
     for ((movie, v) <- users3(user)) {
       log.info(s"已知是 ${v}； ${user} -> ${movie} = ${r.pui(users3(user), movie)}")
     }
+    r.recommondPar(user).foreach(println)
   }
 
 }
@@ -35,8 +36,9 @@ object Exam01 extends util.Log {
  */
 
 class CosRecommend(data: UserMap) extends util.Log {
+
   lazy val sdev = devs()
-  lazy val averages = data.par.map {
+  val averages = data.par.map {
     case (k, v) =>
       k -> v.values.sum / v.size
   }
@@ -57,7 +59,7 @@ class CosRecommend(data: UserMap) extends util.Log {
     log.debug(s"pairList.size=${pairList.size}")
 
     // 相似度矩阵
-    val seq = pairList.flatMap {
+    val seq = pairList.par.flatMap {
       case (b1, b2) =>
         val c = computeSimilarity(b1, b2)
         //println(b1,b2,c)
@@ -95,17 +97,21 @@ class CosRecommend(data: UserMap) extends util.Log {
       (a._1 + b._1, a._2 + b._2, a._3 + b._3)
     }
     val res = num / (Math.sqrt(dem1 * dem2))
-    res
+    if (res.isNaN()) {
+      //println(s"num=${num},dem1=${dem1},dem2=${dem2}")
+      //throw new RuntimeException("NaN")
+      0.0
+    } else {
+      res
+    }
   }
 
   def nr(d: Double, min: Double, max: Double): Double = {
-
-    (2 * (d - min) - (max - min)) / (max - min)
+    if (min == max) 1 else (2 * (d - min) - (max - min)) / (max - min)
   }
 
   def rn(d: Double, min: Double, max: Double): Double = {
-
-    0.5 * (d + 1) * (max - min) + min
+    if (min == max) 1 else 0.5 * (d + 1) * (max - min) + min
   }
   /**
    * u 对 i 的 可能的评价
@@ -132,6 +138,13 @@ class CosRecommend(data: UserMap) extends util.Log {
         val d2 = sin.map(kv => Math.abs(kv._2)).sum
 
         val d = d1 / d2
+        if (d.isNaN()) {
+          println(u)
+          println(run)
+          println(sin)
+          println(d1, d2)
+          throw new RuntimeException("NaN")
+        }
         rn(d, min, max)
     }
   }
@@ -144,7 +157,7 @@ class CosRecommend(data: UserMap) extends util.Log {
         //取得 全部的 movies
         //计算 还有 评价的 movie
         // 按评价从高到低排列
-        val movies = devs.map(_._1).toSet
+        val movies = sdev.keySet
         val mayBe = (movies -- udata.keys)
         log.debug(s"mayBe.size=${mayBe.size}")
         val res = new Array[(String, Double)](mayBe.size)
