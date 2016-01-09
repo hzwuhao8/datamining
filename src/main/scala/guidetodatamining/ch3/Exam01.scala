@@ -27,6 +27,12 @@ object Exam01 extends util.Log {
       log.info(s"已知是 ${v}； ${user} -> ${movie} = ${r.pui(users3(user), movie)}")
     }
     r.recommondPar(user).foreach(println)
+    
+    
+    
+    val r2 = new CosRecommend(SlopeOne.users2)
+    
+    r2.recommondPar("Ben", 5).foreach(println)
   }
 
 }
