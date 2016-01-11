@@ -115,8 +115,7 @@ object Athletes extends util.Log {
           .setOutputCol("scaledFeatures")
           .setWithStd(true)
           .setWithMean(true)
-          
-          
+
         val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("scaledFeatures")
 
         val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, scaler, dt, converter))
@@ -124,6 +123,35 @@ object Athletes extends util.Log {
         println("scaledFeatures Test Error = " + (1.0 - accuracy))
 
       }
+
+      {
+        import org.apache.spark.ml.feature.Bucketizer
+        val a1 = 0.to(300, 5).toArray
+        val splits = a1.map(_.toDouble)
+
+        val weightbucketizer = new Bucketizer()
+          .setInputCol("weight")
+          .setOutputCol("bucketedweight")
+          .setSplits(splits)
+        
+        val heightbucketizer = new Bucketizer()
+          .setInputCol("height")
+          .setOutputCol("bucketedheight")
+          .setSplits(splits)
+
+        weightbucketizer.transform(training).show(10)
+        heightbucketizer.transform(training).show(10)
+
+        val assembler = new VectorAssembler().setInputCols(Array("bucketedweight", "bucketedheight")).setOutputCol("features")
+
+        val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("features")
+
+        val pipeline = new Pipeline().setStages(Array(labelIndex, weightbucketizer, heightbucketizer, assembler, dt, converter))
+        val accuracy = accuracyCount(pipeline)
+        println("bucketedFeatures Test Error = " + (1.0 - accuracy))
+
+      }
+
     }
 
   }
