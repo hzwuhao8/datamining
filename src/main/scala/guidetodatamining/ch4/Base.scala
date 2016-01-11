@@ -17,25 +17,17 @@ import org.apache.spark.ml.classification.NaiveBayes
 
 trait Base {
   val master = "local[3]"
- val path = "data/"
+  val path = "data/"
   val appName: String
   def read(filename: String, sc: SparkContext, sqlContext: SQLContext): DataFrame
   val trainingfile: String
   val testfile: String
 
   val assembler: VectorAssembler
-
-  def main(args: Array[String]) {
-
-    val conf = new SparkConf().setAppName(appName).setMaster(master)
-    val sc = new SparkContext(conf)
-    val sqlContext = new SQLContext(sc)
-    import sqlContext.implicits._
-
-    val training = read(trainingfile, sc, sqlContext)
-    val test = read(testfile, sc, sqlContext)
-
-    def accuracyCount(pipeline: Pipeline) = {
+  
+  def run(training: DataFrame, test: DataFrame, df: DataFrame): Unit = {}
+  
+  def accuracyCount(pipeline: Pipeline,training: DataFrame,test: DataFrame) = {
       // Train model.  This also runs the indexers.
       val model = pipeline.fit(training)
 
@@ -49,7 +41,16 @@ trait Base {
       val accuracy = evaluator.evaluate(predictions)
       accuracy
     }
+  
+  def main(args: Array[String]) {
 
+    val conf = new SparkConf().setAppName(appName).setMaster(master)
+    val sc = new SparkContext(conf)
+    val sqlContext = new SQLContext(sc)
+    import sqlContext.implicits._
+
+    val training = read(trainingfile, sc, sqlContext)
+    val test = read(testfile, sc, sqlContext)
     /**
      *  提取属性 和进行 转换
      *
@@ -59,11 +60,13 @@ trait Base {
     val labelIndex = new StringIndexer().setInputCol("label").setOutputCol("indexedLabel").fit(df)
     val converter = new IndexToString().setInputCol("indexedLabel").setOutputCol("predictedLabel")
 
+    
+
     {
       val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("features")
 
       val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, dt, converter))
-      val accuracy = accuracyCount(pipeline)
+      val accuracy = accuracyCount(pipeline, training,test )
       println("Test Error = " + (1.0 - accuracy))
     }
     //随机森林
@@ -73,7 +76,7 @@ trait Base {
 
       val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, rf, converter))
 
-      val accuracy = accuracyCount(pipeline)
+      val accuracy = accuracyCount(pipeline, training,test )
       println("随机森林 Test Error = " + (1.0 - accuracy))
 
     }
@@ -88,8 +91,8 @@ trait Base {
 
       val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("indexed")
 
-      val pipeline = new Pipeline().setStages(Array(labelIndex, assembler,indexer, dt, converter))
-      val accuracy = accuracyCount(pipeline)
+      val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, indexer, dt, converter))
+      val accuracy = accuracyCount(pipeline, training,test )
       println("VectorIndexer features Test Error = " + (1.0 - accuracy))
 
     }
@@ -107,7 +110,7 @@ trait Base {
         val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("normFeatures")
 
         val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, normalizer, dt, converter))
-        val accuracy = accuracyCount(pipeline)
+        val accuracy = accuracyCount(pipeline, training,test )
         println("normFeatures ,2  Test Error = " + (1.0 - accuracy))
       }
 
@@ -122,7 +125,7 @@ trait Base {
         val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("scaledFeatures")
 
         val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, scaler, dt, converter))
-        val accuracy = accuracyCount(pipeline)
+        val accuracy = accuracyCount(pipeline, training,test )
         println("scaledFeatures Test Error = " + (1.0 - accuracy))
 
       }
@@ -137,7 +140,7 @@ trait Base {
         val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("scaledFeatures")
 
         val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, scaler, dt, converter))
-        val accuracy = accuracyCount(pipeline)
+        val accuracy = accuracyCount(pipeline, training,test )
         println("MinMaxScaler Test Error = " + (1.0 - accuracy))
 
       }
@@ -147,11 +150,11 @@ trait Base {
         val rf = new NaiveBayes().setLabelCol("indexedLabel").setFeaturesCol("features")
         val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, rf, converter))
 
-        val accuracy = accuracyCount(pipeline)
+        val accuracy = accuracyCount(pipeline, training,test )
         println("NaiveBayes Test Error = " + (1.0 - accuracy))
 
       }
-
+      run(training , test, df )
     }
 
   }
