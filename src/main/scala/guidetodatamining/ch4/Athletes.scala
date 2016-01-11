@@ -78,7 +78,7 @@ object Athletes extends util.Log {
     //随机森林
 
     {
-      val rf = new RandomForestClassifier().setLabelCol("indexedLabel").setFeaturesCol("features").setNumTrees(10)
+      val rf = new RandomForestClassifier().setLabelCol("indexedLabel").setFeaturesCol("features").setNumTrees(3)
 
       val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, rf, converter))
 
