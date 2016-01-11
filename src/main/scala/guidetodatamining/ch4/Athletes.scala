@@ -125,30 +125,17 @@ object Athletes extends util.Log {
       }
 
       {
-        import org.apache.spark.ml.feature.Bucketizer
-        val a1 = 0.to(300, 5).toArray
-        val splits = a1.map(_.toDouble)
+        import org.apache.spark.ml.feature.MinMaxScaler
 
-        val weightbucketizer = new Bucketizer()
-          .setInputCol("weight")
-          .setOutputCol("bucketedweight")
-          .setSplits(splits)
-        
-        val heightbucketizer = new Bucketizer()
-          .setInputCol("height")
-          .setOutputCol("bucketedheight")
-          .setSplits(splits)
+        val scaler = new MinMaxScaler()
+          .setInputCol("features")
+          .setOutputCol("scaledFeatures")
 
-        weightbucketizer.transform(training).show(10)
-        heightbucketizer.transform(training).show(10)
+        val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("scaledFeatures")
 
-        val assembler = new VectorAssembler().setInputCols(Array("bucketedweight", "bucketedheight")).setOutputCol("features")
-
-        val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("features")
-
-        val pipeline = new Pipeline().setStages(Array(labelIndex, weightbucketizer, heightbucketizer, assembler, dt, converter))
+        val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, scaler, dt, converter))
         val accuracy = accuracyCount(pipeline)
-        println("bucketedFeatures Test Error = " + (1.0 - accuracy))
+        println("MinMaxScaler Test Error = " + (1.0 - accuracy))
 
       }
 
