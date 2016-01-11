@@ -18,7 +18,7 @@ object MPG extends util.Log {
   val path = "data/"
   val filename = path + "mpg.txt"
   val appName: String = "MPG"
-  case class Data(label: String , features: Vector)
+  case class Data(label: String, features: Vector)
   def main(args: Array[String]) {
 
     val conf = new SparkConf().setAppName(appName).setMaster(master)
@@ -34,7 +34,7 @@ object MPG extends util.Log {
       Data(label, features)
     }).toDF()
     df.show()
-    
+
     val normalizer = new Normalizer()
       .setInputCol("features")
       .setOutputCol("normFeatures")
@@ -50,8 +50,9 @@ object MPG extends util.Log {
     val model = pipemodle.stages.last.asInstanceOf[KMeansModel]
     println("Final Centers: ")
     model.clusterCenters.foreach(println)
-
-    pipemodle.transform(df).groupBy("prediction" ).count().show(77, true)
+    val d2 = pipemodle.transform(df).cache()
+    d2.sort("prediction", "label").show()
+    d2.groupBy("prediction").count().show(77, true)
   }
 
 }
