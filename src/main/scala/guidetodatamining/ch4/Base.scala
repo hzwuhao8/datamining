@@ -13,6 +13,7 @@ import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.classification.{ RandomForestClassificationModel, RandomForestClassifier }
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.sql.DataFrame
+import org.apache.spark.ml.classification.NaiveBayes
 
 trait Base {
   val master = "local[3]"
@@ -125,6 +126,16 @@ trait Base {
 
       }
 
+      // Naive Bayes Classifiers.
+    {
+      val rf = new NaiveBayes().setLabelCol("indexedLabel").setFeaturesCol("features")
+      val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, rf, converter))
+
+      val accuracy = accuracyCount(pipeline)
+      println("NaiveBayes Test Error = " + (1.0 - accuracy))
+
+    }
+    
     }
 
   }
