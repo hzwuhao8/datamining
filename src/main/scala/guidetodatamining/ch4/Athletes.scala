@@ -45,6 +45,22 @@ object Athletes extends util.Log {
     }
     val training = read(trainingfile)
     val test = read(testfile)
+
+    def accuracyCount(pipeline: Pipeline) = {
+      // Train model.  This also runs the indexers.
+      val model = pipeline.fit(training)
+
+      // Make predictions.
+      val predictions = model.transform(test)
+
+      // Select example rows to display.
+      predictions.select("predictedLabel", "label", "features").show(5)
+      val evaluator = new MulticlassClassificationEvaluator().setLabelCol("indexedLabel").setPredictionCol("prediction").setMetricName("precision")
+
+      val accuracy = evaluator.evaluate(predictions)
+      accuracy
+    }
+
     /**
      *  提取属性 和进行 转换
      *
@@ -56,23 +72,11 @@ object Athletes extends util.Log {
 
     val assembler = new VectorAssembler().setInputCols(Array("weight", "height")).setOutputCol("features")
 
-    val evaluator = new MulticlassClassificationEvaluator().setLabelCol("indexedLabel").setPredictionCol("prediction").setMetricName("precision")
-
     {
       val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("features")
 
       val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, dt, converter))
-
-      // Train model.  This also runs the indexers.
-      val model = pipeline.fit(training)
-
-      // Make predictions.
-      val predictions = model.transform(test)
-
-      // Select example rows to display.
-      predictions.select("predictedLabel", "label", "features").show(5)
-
-      val accuracy = evaluator.evaluate(predictions)
+      val accuracy = accuracyCount(pipeline)
       println("Test Error = " + (1.0 - accuracy))
     }
     //随机森林
@@ -82,20 +86,46 @@ object Athletes extends util.Log {
 
       val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, rf, converter))
 
-      // Train model.  This also runs the indexers.
-      val model = pipeline.fit(training)
-
-      // Make predictions.
-      val predictions = model.transform(test)
-
-      // Select example rows to display.
-      predictions.select("predictedLabel", "label", "features").show(5)
-
-      val evaluator = new MulticlassClassificationEvaluator().setLabelCol("indexedLabel").setPredictionCol("prediction").setMetricName("precision")
-      val accuracy = evaluator.evaluate(predictions)
+      val accuracy = accuracyCount(pipeline)
       println("随机森林 Test Error = " + (1.0 - accuracy))
 
     }
+
+    //数据归一化处理
+    {
+      // Normalize each Vector using $L^1$ norm.
+      import org.apache.spark.ml.feature.Normalizer
+      val normalizer = new Normalizer()
+        .setInputCol("features")
+        .setOutputCol("normFeatures")
+        .setP(2.0)
+
+      {
+        val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("normFeatures")
+
+        val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, normalizer, dt, converter))
+        val accuracy = accuracyCount(pipeline)
+        println("normFeatures ,2  Test Error = " + (1.0 - accuracy))
+      }
+
+      {
+        import org.apache.spark.ml.feature.StandardScaler
+        val scaler = new StandardScaler()
+          .setInputCol("features")
+          .setOutputCol("scaledFeatures")
+          .setWithStd(true)
+          .setWithMean(true)
+          
+          
+        val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("scaledFeatures")
+
+        val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, scaler, dt, converter))
+        val accuracy = accuracyCount(pipeline)
+        println("scaledFeatures Test Error = " + (1.0 - accuracy))
+
+      }
+    }
+
   }
 
   case class Data(name: String, label: String, weight: Double, height: Double)
