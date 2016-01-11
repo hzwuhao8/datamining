@@ -14,7 +14,7 @@ import org.apache.spark.sql.SQLContext
  */
 object Athletes extends Base with util.Log {
 
-  val path = "data/"
+  
   val trainingfile = path + "athletesTrainingSet.txt"
   val testfile = path + "athletesTestSet.txt"
 

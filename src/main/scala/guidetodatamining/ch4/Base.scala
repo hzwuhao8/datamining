@@ -17,7 +17,7 @@ import org.apache.spark.ml.classification.NaiveBayes
 
 trait Base {
   val master = "local[3]"
-
+ val path = "data/"
   val appName: String
   def read(filename: String, sc: SparkContext, sqlContext: SQLContext): DataFrame
   val trainingfile: String
@@ -78,6 +78,22 @@ trait Base {
 
     }
 
+    //indexedFeature
+    {
+      import org.apache.spark.ml.feature.VectorIndexer
+      val indexer = new VectorIndexer()
+        .setInputCol("features")
+        .setOutputCol("indexed")
+        .setMaxCategories(10)
+
+      val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("indexed")
+
+      val pipeline = new Pipeline().setStages(Array(labelIndex, assembler,indexer, dt, converter))
+      val accuracy = accuracyCount(pipeline)
+      println("VectorIndexer features Test Error = " + (1.0 - accuracy))
+
+    }
+
     //数据归一化处理
     {
       // Normalize each Vector using $L^1$ norm.
@@ -127,15 +143,15 @@ trait Base {
       }
 
       // Naive Bayes Classifiers.
-    {
-      val rf = new NaiveBayes().setLabelCol("indexedLabel").setFeaturesCol("features")
-      val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, rf, converter))
+      {
+        val rf = new NaiveBayes().setLabelCol("indexedLabel").setFeaturesCol("features")
+        val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, rf, converter))
 
-      val accuracy = accuracyCount(pipeline)
-      println("NaiveBayes Test Error = " + (1.0 - accuracy))
+        val accuracy = accuracyCount(pipeline)
+        println("NaiveBayes Test Error = " + (1.0 - accuracy))
 
-    }
-    
+      }
+
     }
 
   }

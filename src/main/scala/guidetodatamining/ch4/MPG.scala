@@ -2,7 +2,7 @@ package guidetodatamining.ch4
 
 
 import org.apache.spark.SparkContext
-import org.apache.spark.annotation.Experimental
+ 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.ml.feature.VectorAssembler
@@ -10,7 +10,6 @@ import org.apache.spark.ml.feature.VectorAssembler
 object MPG extends Base with util.Log {
   
    val appName ="MPG"
-  val path = "data/"
   val trainingfile = path + "mpgTrainingSet.txt"
   val testfile = path + "mpgTestSet.txt"
 

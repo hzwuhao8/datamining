@@ -11,7 +11,7 @@ import org.apache.spark.ml.feature.VectorAssembler
 object Iris extends  Base with util.Log {
 
   val appName ="Iris"
-  val path = "data/"
+  
   val trainingfile = path + "irisTrainingSet.data.txt"
   val testfile = path + "irisTestSet.data.txt"
 
