@@ -43,7 +43,7 @@ object Cereal extends util.Log {
 
     
     val kmeans = new KMeans()
-      .setK(8)
+      .setK(4)
       .setFeaturesCol("features")
       .setPredictionCol("prediction")
       
