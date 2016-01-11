@@ -4,14 +4,17 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.rdd.RDD
- 
+
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.classification.DecisionTreeClassifier
 import org.apache.spark.ml.Pipeline
- 
+
 import org.apache.spark.ml.feature.StringIndexer
 import org.apache.spark.ml.feature.IndexToString
 import org.apache.spark.ml.feature.VectorAssembler
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+
+import org.apache.spark.ml.classification.{ RandomForestClassificationModel, RandomForestClassifier }
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 
 /**
@@ -53,23 +56,46 @@ object Athletes extends util.Log {
 
     val assembler = new VectorAssembler().setInputCols(Array("weight", "height")).setOutputCol("features")
 
-    val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("features")
-
-    val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, dt, converter))
-
-    // Train model.  This also runs the indexers.
-    val model = pipeline.fit(training)
-
-    // Make predictions.
-    val predictions = model.transform(test)
-
-    // Select example rows to display.
-    predictions.select("predictedLabel", "label", "features").show(5)
-
     val evaluator = new MulticlassClassificationEvaluator().setLabelCol("indexedLabel").setPredictionCol("prediction").setMetricName("precision")
-    val accuracy = evaluator.evaluate(predictions)
-    println("Test Error = " + (1.0 - accuracy))
 
+    {
+      val dt = new DecisionTreeClassifier().setLabelCol("indexedLabel").setFeaturesCol("features")
+
+      val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, dt, converter))
+
+      // Train model.  This also runs the indexers.
+      val model = pipeline.fit(training)
+
+      // Make predictions.
+      val predictions = model.transform(test)
+
+      // Select example rows to display.
+      predictions.select("predictedLabel", "label", "features").show(5)
+
+      val accuracy = evaluator.evaluate(predictions)
+      println("Test Error = " + (1.0 - accuracy))
+    }
+    //随机森林
+
+    {
+      val rf = new RandomForestClassifier().setLabelCol("indexedLabel").setFeaturesCol("features").setNumTrees(10)
+
+      val pipeline = new Pipeline().setStages(Array(labelIndex, assembler, rf, converter))
+
+      // Train model.  This also runs the indexers.
+      val model = pipeline.fit(training)
+
+      // Make predictions.
+      val predictions = model.transform(test)
+
+      // Select example rows to display.
+      predictions.select("predictedLabel", "label", "features").show(5)
+
+      val evaluator = new MulticlassClassificationEvaluator().setLabelCol("indexedLabel").setPredictionCol("prediction").setMetricName("precision")
+      val accuracy = evaluator.evaluate(predictions)
+      println("随机森林 Test Error = " + (1.0 - accuracy))
+
+    }
   }
 
   case class Data(name: String, label: String, weight: Double, height: Double)
