@@ -10,12 +10,14 @@ package guidetodatamining.ch6
  */
 import scala.io.Source
 
-trait Bayes {
-
+trait Bayes extends util.Log {
+  val filename: String 
+  val labelindex: Int 
   def getData1(data: List[List[String]]) = {
     val columns = data.head.size
     val data1 = for (i <- 0 to columns - 1) yield { data.groupBy(x => x(i)).map { case (k, v) => k -> v.size } }
-    data1.foreach(println)
+
+    log.debug(s"data1=\n${data1}")
     data1
   }
   def getData2(data: List[List[String]], labelindex: Int) = {
@@ -25,35 +27,41 @@ trait Bayes {
         val total = v.size
         val x = for (i <- 0 to columns - 1; if i != labelindex) yield {
           val g = v.groupBy(x => x(i))
+          val m = g.size
           g.map {
             case (k, v) =>
-              if (v.size == 0) {
-                k -> (1.0 / (total + g.size))
-              } else {
-                k -> (v.size.toDouble / total)
-              }
+              k -> ((v.size.toDouble + 1.0) / (total + m))
           }
         }
         k -> x
     }
-    data2.foreach(println)
+    log.debug(s"data2=\n${data2}")
     data2
   }
 
-  def classify(kList: Seq[String], data: List[List[String]], labelindex: Int): (String, Double) = {
-    val data1 = getData1(data)
-    val data2 = getData2(data, labelindex)
-    val columns = data.head.size
-    val data3 = data1(columns - 1)
+  def init() : List[List[String]] ={
+    read(filename)
+  }
+  
+  lazy val data =  init()
+  lazy val data1 = getData1(data)
+  lazy val data2 = getData2(data, labelindex)
+  lazy val columns = data.head.size
+  lazy val data3 = data1(labelindex)
+
+  def classify(kList: Seq[String]): (String, Double) = {
+
+    log.debug(s"data3=\n${data3}")
+
     val data4 = data3.map {
       case (k, v) =>
         val p = data2(k).zip(kList).map { case (x, y) => x.getOrElse(y, 0.0) }
         val r = p.product * (v.toDouble / data3.map(_._2).sum)
         (k, r)
     }
-    data4.foreach(println)
+    log.debug(s"data4=\n${data4}")
     val best = data4.toSeq.sortBy(_._2).reverse.head
-    println(s"bset=${best}")
+    log.debug(s"bset=${best}")
     best
   }
 
@@ -62,6 +70,10 @@ trait Bayes {
     val data = lines.map(_.split("\t").toList)
     data.foreach(println)
     data
+  }
+  
+  def read(filename: String*): List[List[String]] ={
+    filename.flatMap(f => read(f)).toList
   }
 
 }
