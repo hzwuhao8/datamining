@@ -9,27 +9,33 @@ object Ihealth extends util.Log {
     val lines = Source.fromFile(s"${path}${i}").getLines().toList
     val data = lines.map(_.split("\t").toList)
     data.foreach(println)
-    val s1 = data.groupBy { x => x.last }.map { case (k, v) => k -> v.size }
-    s1.foreach(println)
-    val Seq(k1, k2) = s1.map(_._1).toSeq
-    println(k1)
-    println(k2)
-    val data1 = for (i <- 0 to 4) yield { data.groupBy(x => x(i)).map { case (k, v) => k -> v.size } }
+    val columns = 5 
+    val data1 = for (i <- 0 to columns-1) yield { data.groupBy(x => x(i)).map { case (k, v) => k -> v.size } }
     data1.foreach(println)
+    
     val data2 = data.groupBy { x => x.last }.map {
       case (k, v) =>
-        val x = for (i <- 0 to 3) yield (v.groupBy(x => x(i)).map { case (k, v) => k -> v.size })
+        val total = v.size 
+        val x = for (i <- 0 to columns-2) yield (v.groupBy(x => x(i)).map { case (k, v) => k -> ( v.size.toDouble/total) })
         k -> x
     }
     data2.foreach(println)
-    val kList = Seq("health", "moderate", "moderate", "yes")
+    val kList = Seq("health", "moderate", "aggressive", "yes")
 
-    val data3 = data1(4)
-    data3.map {
+    val data3 = data1(columns-1)
+    classify(kList , data2, data3)
+  }
+  
+  def  classify(kList: Seq[String], data2: Map[String , Seq[ Map[String , Double]]],data3: Map[String,Int]):(String, Double)={
+     val data4 = data3.map {
       case (k, v) =>
-        val p = data2(k).zip(kList).map { case (x, y) => x.getOrElse(y, 0) }
-        val r = p.product.toDouble / Math.pow(data3(k), p.size) * (v.toDouble / data3.map(_._2).sum)
-        println(k, r)
+        val p = data2(k).zip(kList).map { case (x, y) => x.getOrElse(y, 0.0) }
+        val r = p.product * (v.toDouble / data3.map(_._2).sum)
+        (k,r)
     }
+    data4.foreach(println)
+    val best = data4.toSeq.sortBy(_._2).reverse.head
+    println(s"bset=${best}")
+    best
   }
 }
