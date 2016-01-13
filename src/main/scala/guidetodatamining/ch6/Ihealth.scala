@@ -24,20 +24,12 @@ object Ihealth extends util.Log {
     data2.foreach(println)
     val kList = Seq("health", "moderate", "moderate", "yes")
 
-    val p1 = data2(k1).zip(kList).map { case (x, y) => x.getOrElse(y, 0) }
-    println(p1)
-    val p2 = data2(k2).zip(kList).map { case (x, y) => x.getOrElse(y, 0) }
-    println(p2)
-    val r1 = p1.product.toDouble / Math.pow(data1(4)(k1), p1.size) * (data1(4)(k1).toDouble / data1(4).map(_._2).sum)
-    println(r1)
-
-    val r2 = p2.product.toDouble / Math.pow(data1(4)(k2), p2.size) * (data1(4)(k2).toDouble / data1(4).map(_._2).sum)
-    println(r2)
     val data3 = data1(4)
-    data3.map{ case( k,v) => 
-      val p = data2(k).zip(kList).map { case (x, y) => x.getOrElse(y, 0) } 
-      val r = p.product.toDouble / Math.pow(data3(k), p2.size) * (v.toDouble / data3.map(_._2).sum)
-      println(k,r)
+    data3.map {
+      case (k, v) =>
+        val p = data2(k).zip(kList).map { case (x, y) => x.getOrElse(y, 0) }
+        val r = p.product.toDouble / Math.pow(data3(k), p.size) * (v.toDouble / data3.map(_._2).sum)
+        println(k, r)
     }
   }
 }
