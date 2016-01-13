@@ -13,11 +13,11 @@ import org.apache.spark.ml.feature.Normalizer
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.clustering.KMeansModel
 
-object MPG extends util.Log {
+object Enron extends util.Log {
   val master = "local[3]"
   val path = "data/"
-  val filename = path + "mpg.txt"
-  val appName: String = "MPG"
+  val filename = path + "enrondata.txt"
+  val appName: String = "Enron"
   case class Data(label: String, features: Vector)
   def main(args: Array[String]) {
 
@@ -26,12 +26,15 @@ object MPG extends util.Log {
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
 
-    val df = sc.textFile(filename).map(line => {
+    val df = sc.textFile(filename).flatMap(line => {
       val arr = line.split(",")
       val label = arr(0).trim
-
-      val features = Vectors.dense(arr.tail.map(_.toDouble))
-      Data(label, features)
+      try {
+        val features = Vectors.dense(arr.tail.map(_.toDouble))
+        Some(Data(label, features))
+      } catch {
+        case ex: Exception => None
+      }
     }).toDF()
     df.show()
 
@@ -39,9 +42,9 @@ object MPG extends util.Log {
       .setInputCol("features")
       .setOutputCol("normFeatures")
       .setP(2.0)
-
+    val k = 8
     val kmeans = new KMeans()
-      .setK(8)
+      .setK(k)
       .setFeaturesCol("normFeatures")
       .setPredictionCol("prediction")
 
@@ -53,7 +56,10 @@ object MPG extends util.Log {
     val d2 = pipemodle.transform(df).cache()
     d2.sort("prediction", "label").show()
     d2.groupBy("prediction").count().show(77, true)
-    
+
+    for (i <- 0 to k) {
+      d2.filter(s"prediction= ${i}").select("label").sort("label").show(false)
+    }
   }
 
 }
