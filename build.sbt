@@ -15,20 +15,9 @@ libraryDependencies ++= Seq(
 	"org.apache.spark" % "spark-mllib_2.10" % "1.6.0" ,
 	"org.ansj" % "ansj_seg" % "3.0" , 
 	"com.github.fommil.netlib" % "all" % "1.1.2" pomOnly(),
-	"com.databricks" % "spark-csv_2.10" % "1.3.0"
-	 
-	
+	"com.databricks" % "spark-csv_2.10" % "1.3.0",
+	"org.jsoup" % "jsoup" % "1.8.3"
 )
 
 
-assemblyMergeStrategy in assembly := {
-  case PathList("javax", "servlet", xs @ _*)         => MergeStrategy.first
-  case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
-case PathList(ps @ _*) if ps.last endsWith ".class" => MergeStrategy.first
-  case "application.conf"                            => MergeStrategy.concat
-  case "unwanted.txt"                                => MergeStrategy.discard
-  case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
-    oldStrategy(x)
-}
 
